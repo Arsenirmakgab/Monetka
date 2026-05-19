@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Маркетплейс «Монетка»</title>
+    <style>
+        :root {
+            --primary-gold: #FFB703;
+            --primary-hover: #FB8500;
+            --dark-slate: #0F172A;
+            --dark-card: #1E293B;
+            --light-bg: #FAFAFA;
+            --card-bg: #FFFFFF;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --border-line: #E2E8F0;
+            --accent-success: #10B981;
+            --accent-danger: #EF4444;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.25s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Шапка сайта */
+        header {
+            background-color: var(--dark-slate);
+            color: white;
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo span {
+            color: var(--primary-gold);
+        }
+
+        .nav-btn {
+            background-color: var(--primary-gold);
+            color: var(--dark-slate);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 183, 3, 0.2);
+            transition: var(--transition);
+        }
+
+        .nav-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.admin-mode {
+            background-color: var(--dark-card);
+            color: var(--primary-gold);
+            border: 1px solid rgba(255, 183, 3, 0.3);
+        }
+
+        /* Главный контейнер */
+        main {
+            max-width: 1200px;
+            width: 100%;
+            margin: 2.5rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        /* Категории */
+        .categories-bar {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 2.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.75rem;
+        }
+
+        .category-chip {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-line);
+            color: var(--text-main);
+            padding: 0.65rem 1.6rem;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+
+        .category-chip.active, .category-chip:hover {
+            background-color: var(--dark-slate);
+            color: var(--primary-gold);
+            border-color: var(--dark-slate);
+        }
+
+        /* Сетка товаров */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) { .products-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) { .products-grid { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; } }
+        @media (max-width: 480px) { .products-grid { grid-template-columns: 1fr; } }
+
+        /* Карточка товара */
+        .product-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+            border: 1px solid rgba(15, 23, 42, 0.03);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.09);
+            border-color: rgba(255, 183, 3, 0.2);
+        }
+
+        .product-img-wrapper {
+            position: relative;
+            padding-top: 100%;
+            background-color: #F1F5F9;
+            overflow: hidden;
+        }
+
+        .product-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--dark-slate);
+            margin-bottom: 0.5rem;
+        }
+
+        .product-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            line-height: 1.4;
+            height: 2.8rem;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .product-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+            line-height: 1.5;
+            height: 2.6rem;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: white;
+            z-index: 1;
+        }
+
+        .status-in { background-color: var(--accent-success); }
+        .status-out { background-color: var(--accent-danger); }
+
+        .card-btn {
+            background-color: var(--dark-slate);
+            color: #FFFFFF;
+            border: none;
+            padding: 0.85rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 700;
+            transition: var(--transition);
+        }
+
+        .card-btn:hover { 
+            background-color: var(--primary-gold); 
+            color: var(--dark-slate);
+        }
+
+        /* Управление в админке */
+        .admin-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        .admin-btn {
+            flex: 1;
+            padding: 0.6rem;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .btn-edit { background-color: #F1F5F9; color: var(--dark-slate); }
+        .btn-delete { background-color: #FEE2E2; color: var(--accent-danger); }
+
+        /* Панель Администратора */
+        #admin-panel {
+            display: none;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 2.5rem;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+            border: 1px solid var(--border-line);
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-line);
+            padding-bottom: 1.25rem;
+        }
+
+        .messages-section { margin-top: 2.5rem; }
+        .messages-section h3 { margin-bottom: 1rem; font-weight: 800; }
+        .table-responsive { overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--border-line); }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border-line); }
+        th { background-color: #F8FAFC; font-weight: 700; }
+
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            max-width: 550px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            font-size: 1.75rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+        }
+
+        /* Формы */
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 700; font-size: 0.9rem; }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-line);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            background-color: #F8FAFC;
+            transition: var(--transition);
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(255, 183, 3, 0.15);
+        }
+        .char-count { font-size: 0.75rem; color: var(--text-muted); text-align: right; margin-top: 0.25rem; }
+        .img-urls-container { display: flex; flex-direction: column; gap: 0.6rem; }
+
+        footer {
+            background-color: var(--dark-slate);
+            color: #94A3B8;
+            text-align: center;
+            padding: 2rem;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="#" class="logo" onclick="changeCategory('all')"><span>🪙</span> Монетка</a>
+            <button class="nav-btn" id="toggle-admin-btn" onclick="toggleAdminView()">Панель управления</button>
+        </div>
+    </header>
+
+    <main>
+        <section id="admin-panel">
+            <div class="admin-header">
+                <h2>Режим Администратора</h2>
+                <button class="nav-btn" onclick="openProductModal()">➕ Добавить товар</button>
+            </div>
+            
+            <div class="messages-section">
+                <h3>Сообщения из поддержки</h3>
+                <div class="table-responsive">
+                    <table id="messages-table">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Имя</th>
+                                <th>Email</th>
+                                <th>Сообщение</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messages-list"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="user-view">
+            <div class="categories-bar" id="categories-list"></div>
+            <div class="products-grid" id="products-container"></div>
+        </section>
+    </main>
+
+    <!-- Модалка поддержки -->
+    <div class="modal" id="support-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('support-modal')">&times;</button>
+            <h3>Написать в поддержку</h3>
+            <form id="support-form" onsubmit="handleSupportSubmit(event)">
+                <div class="form-group">
+                    <label for="sup-name">Ваше имя</label>
+                    <input type="text" id="sup-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="sup-email">Email</label>
+                    <input type="email" id="sup-email" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="sup-msg">Сообщение</label>
+                    <textarea id="sup-msg" class="form-control" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="nav-btn" style="width: 100%; padding: 0.9rem;">Отправить обращение</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модалка товара -->
+    <div class="modal" id="product-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('product-modal')">&times;</button>
+            <h3 id="modal-product-title">Добавить товар</h3>
+            <form id="product-form" onsubmit="handleProductSubmit(event)">
+                <input type="hidden" id="prod-id">
+                
+                <div class="form-group">
+                    <label for="prod-title">Название товара (макс. 50 символов)</label>
+                    <input type="text" id="prod-title" class="form-control" maxlength="50" oninput="updateCharCount('prod-title', 'title-count', 50)" required>
+                    <div class="char-count" id="title-count">0 / 50</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="prod-price">Цена (руб.)</label>
+                    <input type="number" id="prod-price" class="form-control" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="prod-category">Категория</label>
+                    <select id="prod-category" class="form-control" required>
+                        <option value="Электроника">Электроника</option>
+                        <option value="Одежда">Одежда</option>
+                        <option value="Дом">Дом</option>
+                        <option value="Детям">Детям</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="prod-status">Статус наличия</label>
+                    <select id="prod-status" class="form-control" required>
+                        <option value="true">В наличии</option>
+                        <option value="false">Нет в наличии</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="prod-desc">Описание (макс. 1000 символов)</label>
+                    <textarea id="prod-desc" class="form-control" rows="4" maxlength="1000" oninput="updateCharCount('prod-desc', 'desc-count', 1000)" required></textarea>
+                    <div class="char-count" id="desc-count">0 / 1000</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ссылки на фото (от 1 до 5 шт.)</label>
+                    <div class="img-urls-container" id="img-inputs-list">
+                        <input type="url" class="form-control prod-img-url" placeholder="Ссылка на фото 1 (основное)" required>
+                        <input type="url" class="form-control prod-img-url" placeholder="Ссылка на фото 2">
+                        <input type="url" class="form-control prod-img-url" placeholder="Ссылка на фото 3">
+                        <input type="url" class="form-control prod-img-url" placeholder="Ссылка на фото 4">
+                        <input type="url" class="form-control prod-img-url" placeholder="Ссылка на фото 5">
+                    </div>
+                </div>
+
+                <button type="submit" class="nav-btn" style="width: 100%; padding: 0.9rem;" id="save-prod-btn">Сохранить карточку</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Маркетплейс «Монетка». Чистый фронтенд без внешних зависимостей.</p>
+    </footer>
+
+    <script>
+        // Демо-данные с независимыми SVG-картинками (генерируются прямо в браузере)
+        const demoProducts = [
+            {
+                id: 1,
+                title: "Смартфон Пиксель X",
+                price: 59990,
+                category: "Электроника",
+                inStock: true,
+                desc: "Флагманский смартфон с великолепной камерой и чистым ИИ-ассистентом.",
+                images: ["data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 100 100'><rect width='100%' height='100%' fill='%230F172A'/><circle cx='50' cy='50' r='25' fill='%23FFB703'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='8'>Gadget</text></svg>"]
+            },
+            {
+                id: 2,
+                title: "Худи Оверсайз Стиль",
+                price: 3490,
+                category: "Одежда",
+                inStock: true,
+                desc: "Уютный и теплый худи из качественного плотного хлопка.",
+                images: ["data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 100 100'><rect width='100%' height='100%' fill='%23FFB703'/><circle cx='50' cy='50' r='25' fill='%230F172A'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='8'>Style</text></svg>"]
+            },
+            {
+                id: 3,
+                title: "Умный Чайник-Термос",
+                price: 4200,
+                category: "Дом",
+                inStock: false,
+                desc: "Чайник с возможностью управления со смартфона.",
+                images: ["data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 100 100'><rect width='100%' height='100%' fill='%2364748B'/><circle cx='50' cy='50' r='25' fill='%23FFFFFF'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='black' font-size='8'>Home</text></svg>"]
+            },
+            {
+                id: 4,
+                title: "Конструктор Космический Корабль",
+                price: 2800,
+                category: "Детям",
+                inStock: true,
+                desc: "Развивающий конструктор из 450 деталей.",
+                images: ["data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 100 100'><rect width='100%' height='100%' fill='%2310B981'/><circle cx='50' cy='50' r='25' fill='%23FFFFFF'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='black' font-size='8'>Toys</text></svg>"]
+            }
+        ];
+
+        let products = JSON.parse(localStorage.getItem('monetka_products')) || [];
+        let messages = JSON.parse(localStorage.getItem('monetka_messages')) || [];
+        let currentCategory = 'all';
+        let isAdminMode = false;
+
+        if (products.length === 0) {
+            products = demoProducts;
+            localStorage.setItem('monetka_products', JSON.stringify(products));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCategories();
+            renderProducts();
+            renderMessages();
+        });
+
+        function toggleAdminView() {
+            isAdminMode = !isAdminMode;
+            const adminPanel = document.getElementById('admin-panel');
+            const toggleBtn = document.getElementById('toggle-admin-btn');
+            
+            if (isAdminMode) {
+                adminPanel.style.display = 'block';
+                toggleBtn.textContent = 'Выйти из управления';
+                toggleBtn.classList.add('admin-mode');
+            } else {
+                adminPanel.style.display = 'none';
+                toggleBtn.textContent = 'Панель управления';
+                toggleBtn.classList.remove('admin-mode');
+            }
+            renderProducts();
+        }
+
+        function renderCategories() {
+            const categories = ['all', 'Электроника', 'Одежда', 'Дом', 'Детям'];
+            const container = document.getElementById('categories-list');
+            
+            container.innerHTML = categories.map(cat => {
+                const name = cat === 'all' ? 'Все товары' : cat;
+                const activeClass = currentCategory === cat ? 'active' : '';
+                return `<div class="category-chip ${activeClass}" onclick="changeCategory('${cat}')">${name}</div>`;
+            }).join('');
+        }
+
+        function changeCategory(category) {
+            currentCategory = category;
+            renderCategories();
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '';
+
+            const filtered = currentCategory === 'all' 
+                ? products 
+                : products.filter(p => p.category === currentCategory);
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); margin: 3rem 0;">В этой категории пока нет товаров.</p>';
+                return;
+            }
+
+            filtered.forEach(prod => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                
+                const mainImg = (prod.images && prod.images.length > 0 && prod.images[0] !== "") 
+                    ? prod.images[0] 
+                    : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100%" height="100%" fill="%23ccc"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle">No Photo</text></svg>';
+
+                const statusText = prod.inStock ? 'В наличии' : 'Нет в наличии';
+                const statusClass = prod.inStock ? 'status-in' : 'status-out';
+
+                let actionHtml = `<button class="card-btn" onclick="openSupportModal(${prod.id})">Написать в поддержку</button>`;
+                
+                if (isAdminMode) {
+                    actionHtml = `
+                        <div class="admin-actions">
+                            <button class="admin-btn btn-edit" onclick="openProductModal(${prod.id})">Редакт.</button>
+                            <button class="admin-btn btn-delete" onclick="deleteProduct(${prod.id})">Удалить</button>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <span class="status-badge ${statusClass}">${statusText}</span>
+                    <div class="product-img-wrapper">
+                        <img src="${mainImg}" class="product-img" alt="${prod.title}">
+                    </div>
+                    <div class="product-info">
+                        <div class="product-price">${prod.price.toLocaleString()} ₽</div>
+                        <div class="product-title" title="${prod.title}">${prod.title}</div>
+                        <div class="product-desc" title="${prod.desc}">${prod.desc}</div>
+                        ${actionHtml}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateCharCount(fieldId, countId, max) {
+            const val = document.getElementById(fieldId).value;
+            document.getElementById(countId).textContent = `${val.length} / ${max}`;
+        }
+
+        function openSupportModal(prodId) {
+            document.getElementById('support-modal').style.display = 'flex';
+            if(prodId) {
+                const prod = products.find(p => p.id === prodId);
+                document.getElementById('sup-msg').value = `Здравствуйте! Интересует товар "${prod.title}" (ID: ${prod.id}). `;
+            }
+        }
+
+        function openProductModal(prodId = null) {
+            const form = document.getElementById('product-form');
+            form.reset();
+            document.getElementById('title-count').textContent = '0 / 50';
+            document.getElementById('desc-count').textContent = '0 / 1000';
+
+            if (prodId) {
+                document.getElementById('modal-product-title').textContent = 'Редактировать товар';
+                const prod = products.find(p => p.id === prodId);
+                
+                document.getElementById('prod-id').value = prod.id;
+                document.getElementById('prod-title').value = prod.title;
+                document.getElementById('prod-price').value = prod.price;
+                document.getElementById('prod-category').value = prod.category;
+                document.getElementById('prod-status').value = prod.inStock.toString();
+                document.getElementById('prod-desc').value = prod.desc;
+
+                const inputs = document.querySelectorAll('.prod-img-url');
+                inputs.forEach((input, index) => {
+                    input.value = prod.images[index] || '';
+                });
+
+                updateCharCount('prod-title', 'title-count', 50);
+                updateCharCount('prod-desc', 'desc-count', 1000);
+            } else {
+                document.getElementById('modal-product-title').textContent = 'Добавить товар';
+                document.getElementById('prod-id').value = '';
+            }
+            document.getElementById('product-modal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function handleSupportSubmit(e) {
+            e.preventDefault();
+            const newMsg = {
+                date: new Date().toLocaleString('ru-RU'),
+                name: document.getElementById('sup-name').value,
+                email: document.getElementById('sup-email').value,
+                text: document.getElementById('sup-msg').value
+            };
+            messages.unshift(newMsg);
+            localStorage.setItem('monetka_messages', JSON.stringify(messages));
+            alert('Ваше сообщение успешно отправлено в поддержку!');
+            closeModal('support-modal');
+            renderMessages();
+        }
+
+        function handleProductSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('prod-id').value;
+            const title = document.getElementById('prod-title').value;
+            const price = parseFloat(document.getElementById('prod-price').value);
+            const category = document.getElementById('prod-category').value;
+            const inStock = document.getElementById('prod-status').value === 'true';
+            const desc = document.getElementById('prod-desc').value;
+
+            const imgInputs = document.querySelectorAll('.prod-img-url');
+            const images = [];
+            imgInputs.forEach(input => {
+                if(input.value.trim() !== '') images.push(input.value.trim());
+            });
+
+            if(images.length === 0) {
+                alert('Необходимо указать хотя бы одну ссылку на фото!');
+                return;
+            }
+
+            if (id) {
+                const index = products.findIndex(p => p.id === parseInt(id));
+                products[index] = { id: parseInt(id), title, price, category, inStock, desc, images };
+            } else {
+                products.push({ id: Date.now(), title, price, category, inStock, desc, images });
+            }
+
+            localStorage.setItem('monetka_products', JSON.stringify(products));
+            closeModal('product-modal');
+            renderProducts();
+        }
+
+        function deleteProduct(id) {
+            if(confirm('Вы уверены, что хотите удалить этот товар?')) {
+                products = products.filter(p => p.id !== id);
+                localStorage.setItem('monetka_products', JSON.stringify(products));
+                renderProducts();
+            }
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('messages-list');
+            if (messages.length === 0) {
+                container.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted)">Сообщений от пользователей пока нет.</td></tr>';
+                return;
+            }
+            container.innerHTML = messages.map(m => `
+                <tr>
+                    <td style="color: var(--text-muted); font-size: 0.85rem;">${m.date}</td>
+                    <td><strong>${escapeHtml(m.name)}</strong></td>
+                    <td><a href="mailto:${m.email}" style="color: var(--primary-hover); text-decoration:none;">${escapeHtml(m.email)}</a></td>
+                    <td>${escapeHtml(m.text)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>
